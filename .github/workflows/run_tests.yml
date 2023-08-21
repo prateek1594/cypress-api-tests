@@ -1,0 +1,42 @@
+name: Run Cypress API tests for Petstore application
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  test:
+    name: Run Cypress API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16 # The version of node you want to use
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Cypress Tests
+        run: npm run test # Modify this command according to your package.json
+
+      - name: Collect Artifacts on Failure
+        if: ${{ job.status != 'success' }}
+        run: |
+          mkdir -p artifacts
+          mv cypress/screenshots artifacts/
+          mv cypress/videos artifacts/
+          mv cypress/logs artifacts/
+        shell: bash
+
+      - name: Upload Artifacts on Failure
+        if: ${{ job.status != 'success' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-failure-artifacts
+          path: artifacts/
